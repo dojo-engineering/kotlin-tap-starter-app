@@ -26,7 +26,7 @@ class PaymentFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
 
         _binding = FragmentPayBinding.inflate(inflater, container, false)
         return binding.root
@@ -43,19 +43,19 @@ class PaymentFragment : Fragment() {
         }
 
         val handleSaleResponse = registerForActivityResult(StartActivityForResult()) { result ->
+            val saleStatus = result.data?.getStringExtra("com.dojo.extra.SALE_STATUS")
             val baseAmount = result.data?.getIntExtra("com.dojo.extra.BASE_AMOUNT", -1)
             val gratuityAmount = result.data?.getIntExtra("com.dojo.extra.GRATUITY_AMOUNT", 0)
-            val txResult = result.data?.getIntExtra("com.dojo.extra.TRANSACTION_RESULT", -1)
-            val txId = result.data?.getIntExtra("com.dojo.extra.TRANSACTION_ID", -1)
-            displayToast("Attempted payment ($txId) for $baseAmount with gratuity of $gratuityAmount was $txResult")
+            val txResult = result.data?.getStringExtra("com.dojo.extra.TRANSACTION_RESULT")
+            displayToast("Payment for $baseAmount with gratuity of $gratuityAmount was $txResult and $saleStatus")
         }
 
         binding.pay.setOnClickListener {
             try {
                 val saleIntent = Intent("com.dojo.action.SALE")
+                saleIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                 saleIntent.putExtra("com.dojo.extra.BASE_AMOUNT", 1000)
                 handleSaleResponse.launch(saleIntent)
-                startActivity(saleIntent)
             } catch (exception: Exception) {
                 displayToast("Error launching the Tap SALE intent")
                 println("Error launching activity $exception")
@@ -74,9 +74,8 @@ class PaymentFragment : Fragment() {
         binding.initialise.setOnClickListener {
             try {
                 val initIntent = Intent("com.dojo.action.INIT")
-                initIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                initIntent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
                 handleInitResponse.launch(initIntent);
-                startActivity(initIntent);
             } catch (exception: Exception) {
                 displayToast("Error launching the Tap INIT intent")
                 println("Error launching activity $exception")
