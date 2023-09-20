@@ -1,12 +1,16 @@
 package com.example.sampleposapp
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.navigation.fragment.findNavController
+import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.fragment.app.Fragment
 import com.example.sampleposapp.databinding.FragmentPayBinding
+
 
 /**
  * A simple [Fragment] subclass as the default destination in the navigation.
@@ -32,8 +36,51 @@ class PaymentFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        binding.buttonFirst.setOnClickListener {
-            findNavController().navigate(R.id.action_Payment_to_PaymentResponse)
+        val displayToast = fun(message: String) {
+            val duration = Toast.LENGTH_SHORT
+            val toast = Toast.makeText(context, message, duration) // in Activity
+            toast.show()
+        }
+
+        val handleSaleResponse = registerForActivityResult(StartActivityForResult()) { result ->
+            val baseAmount = result.data?.getIntExtra("com.dojo.extra.BASE_AMOUNT", -1)
+            val gratuityAmount = result.data?.getIntExtra("com.dojo.extra.GRATUITY_AMOUNT", 0)
+            val txResult = result.data?.getIntExtra("com.dojo.extra.TRANSACTION_RESULT", -1)
+            val txId = result.data?.getIntExtra("com.dojo.extra.TRANSACTION_ID", -1)
+            displayToast("Attempted payment ($txId) for $baseAmount with gratuity of $gratuityAmount was $txResult")
+        }
+
+        binding.pay.setOnClickListener {
+            try {
+                val saleIntent = Intent("com.dojo.action.SALE")
+                saleIntent.putExtra("com.dojo.extra.BASE_AMOUNT", 1000)
+                handleSaleResponse.launch(saleIntent)
+                startActivity(saleIntent)
+            } catch (exception: Exception) {
+                displayToast("Error launching the Tap SALE intent")
+                println("Error launching activity $exception")
+            }
+        }
+
+        val handleInitResponse = registerForActivityResult(StartActivityForResult()) { result ->
+            println(result);
+            if (result.resultCode == Activity.RESULT_OK) {
+                displayToast("Successfully initialised TaP")
+            } else {
+                displayToast("Failed to initialise TaP")
+            }
+        }
+
+        binding.initialise.setOnClickListener {
+            try {
+                val initIntent = Intent("com.dojo.action.INIT")
+                initIntent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+                handleInitResponse.launch(initIntent);
+                startActivity(initIntent);
+            } catch (exception: Exception) {
+                displayToast("Error launching the Tap INIT intent")
+                println("Error launching activity $exception")
+            }
         }
     }
 

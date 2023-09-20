@@ -4,9 +4,13 @@
     <!-- Strings used for fragments for navigation -->
     <string name="payment_fragment_label">Create a Payment</string>
     <string name="payment_response_fragment_label">Payment Response</string>
-    <string name="next">Next</string>
-    <string name="previous">Previous</string>
+    <string name="back">Back</string>
+    <string name="refund">Refund</string>
     <string name="pay">Pay</string>
+    <string name="initialise">Initialise</string>
+    <string name="transaction_result_text">Tx Result</string>
+    <string name="transaction_result_value">UNKNOWN</string>
     <string name="amount_text">Amount</string>
+    <string name="gratuity_text">Gratuity</string>
     <string name="amount_value">£10.00</string>
 </resources>
